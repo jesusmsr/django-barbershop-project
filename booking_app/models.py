@@ -7,6 +7,8 @@ class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookingUser')
     notes = models.CharField(max_length=255)
     active = models.BooleanField(default=True)
+    booking_date = models.DateTimeField(default=None)
+    duration = models.PositiveIntegerField(default=0)
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now_add=True)
     

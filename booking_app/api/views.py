@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from booking_app.api.serializers import BookingSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-
+from datetime import datetime, timedelta
 
 class BookingAV(APIView):
     permission_classes = [IsAuthenticated]
@@ -20,10 +20,21 @@ class BookingAV(APIView):
     def post(self, request):
         serializer = BookingSerializer(data=request.data)
         user = self.request.user
+        bookings = Booking.objects.all()
         
         if serializer.is_valid():
-            serializer.save(user=user)
-            return Response(serializer.data)
+            parsed_time = datetime.strptime(request.data['booking_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            final_time = parsed_time + timedelta(minutes=request.data['duration'])
+            if len(bookings) > 1:
+                for booking in bookings:
+                    if booking.booking_date > parsed_time and booking.booking_date < final_time:
+                        return Response({'error':'booking date intersect with another booking'})
+                    else:
+                        serializer.save(user=user)
+                        return Response(serializer.data)
+            else:
+                serializer.save(user=user)
+                return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
