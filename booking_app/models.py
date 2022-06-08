@@ -11,4 +11,4 @@ class Booking(models.Model):
     updatedAt = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.booking_code
+        return self.booking_code + ' '+self.user.username
