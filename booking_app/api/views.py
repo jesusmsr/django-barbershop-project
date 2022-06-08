@@ -33,10 +33,13 @@ class BookingAV(APIView):
         except Booking.DoesNotExist:
             return Response({'error': 'Booking does not exist'},status=status.HTTP_404_NOT_FOUND)
         
-        serializer = BookingSerializer(booking, data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+        if booking.user == request.user:
+            serializer = BookingSerializer(booking, data=request.data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error':'You cant edit other users booking'})
         
