@@ -5,6 +5,7 @@ from booking_app.api.serializers import BookingSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from datetime import datetime, timedelta
+import pytz
 
 class BookingAV(APIView):
     permission_classes = [IsAuthenticated]
@@ -23,11 +24,12 @@ class BookingAV(APIView):
         bookings = Booking.objects.all()
         
         if serializer.is_valid():
+            utc = pytz.UTC
             parsed_time = datetime.strptime(request.data['booking_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
             final_time = parsed_time + timedelta(minutes=request.data['duration'])
             if len(bookings) > 1:
                 for booking in bookings:
-                    if booking.booking_date > parsed_time and booking.booking_date < final_time:
+                    if utc.localize(parsed_time) > booking.booking_date and final_time:
                         return Response({'error':'booking date intersect with another booking'})
                     else:
                         serializer.save(user=user)
