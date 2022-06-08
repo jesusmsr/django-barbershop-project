@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 
-class BookingListAV(APIView):
+class BookingAV(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -17,9 +17,6 @@ class BookingListAV(APIView):
         serializer = BookingSerializer(bookings, many=True, context={'request': request})
         return Response(serializer.data)
     
-class BookingCreateAV(APIView):
-    permission_classes = [IsAuthenticated]
-    
     def post(self, request):
         serializer = BookingSerializer(data=request.data)
         user = self.request.user
@@ -29,3 +26,17 @@ class BookingCreateAV(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    def put(self, request, pk):
+        try:
+            booking = Booking.objects.get(pk=pk)
+        except Booking.DoesNotExist:
+            return Response({'error': 'Booking does not exist'},status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = BookingSerializer(booking, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
