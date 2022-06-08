@@ -10,7 +10,10 @@ class BookingListAV(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        bookings = Booking.objects.all()
+        if self.request.user.is_staff:
+            bookings = Booking.objects.all()
+        else:
+            bookings = Booking.objects.filter(user=self.request.user)
         serializer = BookingSerializer(bookings, many=True, context={'request': request})
         return Response(serializer.data)
     
