@@ -21,24 +21,21 @@ class BookingAV(APIView):
     def post(self, request):
         serializer = BookingSerializer(data=request.data)
         user = self.request.user
-        bookings = Booking.objects.all()
-        
-        if serializer.is_valid():
-            utc = pytz.UTC
-            parsed_time = datetime.strptime(request.data['booking_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
-            final_time = parsed_time + timedelta(minutes=request.data['duration'])
-            if len(bookings) > 1:
+        if Booking.objects.filter(booking_code=request.data['booking_code']):
+            return Response({'error': 'There is already a booking with that code'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            if serializer.is_valid():
+                bookings = Booking.objects.all()
+                end_date_current = serializer.validated_data['booking_date'] + timedelta(minutes = serializer.validated_data['duration'])
+                
                 for booking in bookings:
-                    if utc.localize(parsed_time) > booking.booking_date and final_time:
-                        return Response({'error':'booking date intersect with another booking'})
-                    else:
-                        serializer.save(user=user)
-                        return Response(serializer.data)
-            else:
+                    end_date_booking = booking.booking_date + timedelta(minutes = booking.duration)
+                    if (serializer.validated_data['booking_date'] < end_date_booking) and (end_date_current > booking.booking_date):
+                        return Response({'error': 'there is another booking at that time'}, status=status.HTTP_400_BAD_REQUEST)
                 serializer.save(user=user)
                 return Response(serializer.data)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
     def put(self, request, pk):
         try:
