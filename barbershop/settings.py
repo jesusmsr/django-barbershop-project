@@ -73,6 +73,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'barbershop.wsgi.application'
 
+AUTH_USER_MODEL = 'user_app.account'
+
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases

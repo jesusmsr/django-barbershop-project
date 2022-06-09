@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from user_app.models import Account
 
 class RegistrationSerializer(serializers.ModelSerializer):
     password_confirm = serializers.CharField(style={'input_type': 'password'}, write_only=True)
     
     class Meta:
-        model = User
-        fields = ['username','email','password', 'password_confirm']
+        model = Account
+        fields = ['username','email','password', 'password_confirm','phone_number']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -18,10 +18,19 @@ class RegistrationSerializer(serializers.ModelSerializer):
         if password != password_confirm:
             raise serializers.ValidationError({'error': 'password does not match'})
         
-        if User.objects.filter(email=self.validated_data['email']).exists():
+        if Account.objects.filter(email=self.validated_data['email']).exists():
             raise serializers.ValidationError({'error': 'there is already a user with that email'})
         
-        account = User(email=self.validated_data['email'], username=self.validated_data['username'])
-        account.set_password(password)
+        #account = Account(email=self.validated_data['email'], username=self.validated_data['username'])
+        account = Account.objects.create_user(
+            first_name=self.validated_data['first_name'], 
+            last_name=self.validated_data['last_name'],
+            email= self.validated_data['email'], 
+            username= self.validated_data['username'],
+            password= self.validated_data['password'],
+        )
+        
+        account.phone_number = self.validated_data['phone_number']
+        #account.set_password(password)
         account.save()
         return account
