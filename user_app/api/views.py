@@ -38,7 +38,7 @@ def login_view(request):
         
         account = auth.authenticate(email=email, password=password)
         if account is not None:
-            data['response'] = 'Login successfull'
+            data['response'] = '200'
             data['username'] = account.username
             data['email'] = account.email
             data['first_name'] = account.first_name
@@ -50,7 +50,7 @@ def login_view(request):
                 'access': str(refresh.access_token)
             }
             
-            return Response(data)
+            return Response(data, status=status.HTTP_200_OK)
         else:
             data['error'] = 'bad credentials'
-            return Response(data, status=status.HTTP_INTERNAL_SERVER_ERROR)
+            return Response(data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
