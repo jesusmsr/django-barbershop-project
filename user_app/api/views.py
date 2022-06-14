@@ -1,10 +1,33 @@
-from rest_framework.decorators import api_view
+import email
+from rest_framework.decorators import api_view, permission_classes
 from user_app.api.serializers import RegistrationSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from django.contrib import auth
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
+from user_app.models import Account
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated))
+def session_view(request):
+    if request.method == 'GET':
+        user = request.user
+        account = Account.objects.get(email=user)
+        data = {}
+        if account is not None:
+            data['response'] = 'The user is logged in'
+            data['username'] = account.username,
+            data['email'] = account.emai
+            
+             
+
+@api_view(['POST'])
+def logout_view(request):
+    if request.method == 'POST':
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 def register_view(request):
