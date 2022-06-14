@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from user_app.models import Account
 
 @api_view(['GET'])
-@permission_classes((IsAuthenticated))
+@permission_classes((IsAuthenticated,))
 def session_view(request):
     if request.method == 'GET':
         user = request.user
@@ -19,7 +19,19 @@ def session_view(request):
         if account is not None:
             data['response'] = 'The user is logged in'
             data['username'] = account.username,
-            data['email'] = account.emai
+            data['email'] = account.email,
+            data['first_name'] = account.first_name,
+            data['last_name'] = account.last_name,
+            data['phone_number'] = account.phone_number,
+            refresh = RefreshToken.for_user(account)
+            data['token'] = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }
+            return Response(data)
+        else:
+            data['Error': 'User not found']
+            return Response(data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
              
 
