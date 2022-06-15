@@ -18,11 +18,11 @@ def session_view(request):
         data = {}
         if account is not None:
             data['response'] = 'The user is logged in'
-            data['username'] = account.username,
-            data['email'] = account.email,
-            data['first_name'] = account.first_name,
-            data['last_name'] = account.last_name,
-            data['phone_number'] = account.phone_number,
+            data['username'] = account.username
+            data['email'] = account.email
+            data['first_name'] = account.first_name
+            data['last_name'] = account.last_name
+            data['phone_number'] = account.phone_number
             refresh = RefreshToken.for_user(account)
             data['token'] = {
                 'refresh': str(refresh),
